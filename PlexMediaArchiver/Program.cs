@@ -6,7 +6,11 @@ namespace PlexMediaArchiver
     {
         static void Main(string[] args)
         {
-            Console.WriteLine("Hello World!");
+            var api = new PlexAPI();
+            var serverNames = api.ServerNames();
+
+            var movieLibrary = api.GetMovieLibrary();
+            Console.WriteLine(movieLibrary.MediaContainer.Key);
         }
     }
 }
