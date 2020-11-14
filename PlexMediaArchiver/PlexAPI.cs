@@ -65,7 +65,7 @@ namespace PlexMediaArchiver
             var login = ConfigurationManager.AppSettings["PlexLogin"];
             var password = ConfigurationManager.AppSettings["PlexPassword"];
 
-            plexUser = plexApi.SignIn(login, password).Result;
+            plexUser = plexApi.SignIn(login, password).Result; 
         }
 
         private Server GetPreferredServer()
@@ -126,9 +126,13 @@ namespace PlexMediaArchiver
             var plexMediaContainer = plexApi.GetLibraries(plexServer.AccessToken, fullURL).Result;
             //Getting connection forcibly closed????
             //Not sure if the rest of this works
+            //It does :)
 
-            var movieLibrary = plexMediaContainer.MediaContainer.Directory.First(c => c.Title == "Movies");
+            var movieLibrary = plexMediaContainer.MediaContainer.Directory.FirstOrDefault(c => c.Title == "Movies");
+            var tvLibrary = plexMediaContainer.MediaContainer.Directory.FirstOrDefault(c => c.Title == "TV Shows");
+            //Small update to the above...it gets the libraries now.
 
+            Console.WriteLine(movieLibrary.Key);
             return plexApi.GetLibrary(plexServer.AccessToken, fullURL, movieLibrary.Key).Result;
         }
     }
