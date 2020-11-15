@@ -151,13 +151,21 @@ namespace PlexMediaArchiver
         {
             DateTime? lastViewed = null;
 
-            if (lastViewedAt > 0)
+            try
             {
-                DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(lastViewedAt);
-                lastViewed = DateTime.SpecifyKind(dateTimeOffset.DateTime, DateTimeKind.Utc);
-            }
+                if (lastViewedAt > 0)
+                {
+                    DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(lastViewedAt);
+                    lastViewed = DateTime.SpecifyKind(dateTimeOffset.DateTime, DateTimeKind.Utc);
+                }
 
-            return lastViewed.HasValue ? lastViewed.Value.ToLocalTime() : (DateTime?)null;
+                return lastViewed.HasValue ? lastViewed.Value.ToLocalTime() : (DateTime?)null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
 
         public MovieViewModel GetMovieByTitle(string fullOrPartialTitle)
