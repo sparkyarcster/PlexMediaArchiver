@@ -10,7 +10,11 @@ namespace PlexMediaArchiver
             var serverNames = api.ServerNames();
 
             var movieLibrary = api.GetMovieLibrary();
-            Console.WriteLine(movieLibrary.MediaContainer.Key);
+            
+            foreach(var movie in movieLibrary.MediaContainer.Metadata)
+            {
+                Console.WriteLine(movie.Title);
+            }
         }
     }
 }

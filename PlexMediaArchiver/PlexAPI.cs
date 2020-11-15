@@ -124,15 +124,13 @@ namespace PlexMediaArchiver
             var plexServer = GetPreferredServer();
             var fullURL = plexServer.FullUri.ToString();
             var plexMediaContainer = plexApi.GetLibraries(plexServer.AccessToken, fullURL).Result;
-            //Getting connection forcibly closed????
-            //Not sure if the rest of this works
-            //It does :)
+            //If this errors for "forcibly closed by the remote host", go to your Plex settings, choose "Network" and set it to "Preferred".
+            //If it is set to "required", it will error for not using https. But the HTTPS cert for the IP is not valid.
 
             var movieLibrary = plexMediaContainer.MediaContainer.Directory.FirstOrDefault(c => c.Title == "Movies");
             var tvLibrary = plexMediaContainer.MediaContainer.Directory.FirstOrDefault(c => c.Title == "TV Shows");
             //Small update to the above...it gets the libraries now.
 
-            Console.WriteLine(movieLibrary.Key);
             return plexApi.GetLibrary(plexServer.AccessToken, fullURL, movieLibrary.Key).Result;
         }
     }
