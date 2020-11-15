@@ -119,7 +119,7 @@ namespace PlexMediaArchiver
             return null;
         }
 
-        public Plex.Api.Models.PlexMediaContainer GetMovieLibrary()
+        private Plex.Api.Models.PlexMediaContainer GetLibrary(string libraryName)
         {
             var plexServer = GetPreferredServer();
             var fullURL = plexServer.FullUri.ToString();
@@ -127,11 +127,88 @@ namespace PlexMediaArchiver
             //If this errors for "forcibly closed by the remote host", go to your Plex settings, choose "Network" and set it to "Preferred".
             //If it is set to "required", it will error for not using https. But the HTTPS cert for the IP is not valid.
 
-            var movieLibrary = plexMediaContainer.MediaContainer.Directory.FirstOrDefault(c => c.Title == "Movies");
-            var tvLibrary = plexMediaContainer.MediaContainer.Directory.FirstOrDefault(c => c.Title == "TV Shows");
-            //Small update to the above...it gets the libraries now.
+            var library = plexMediaContainer.MediaContainer.Directory.FirstOrDefault(c => c.Title == libraryName);
 
-            return plexApi.GetLibrary(plexServer.AccessToken, fullURL, movieLibrary.Key).Result;
+            if (library == null)
+            {
+                return null;
+            }
+
+            return plexApi.GetLibrary(plexServer.AccessToken, fullURL, library.Key).Result;
+        }
+
+        public Plex.Api.Models.PlexMediaContainer GetMovieLibrary()
+        {
+            return GetLibrary("Movies");
+        }
+
+        public Plex.Api.Models.PlexMediaContainer GetTVLibrary()
+        {
+            return GetLibrary("TV Shows");
+        }
+
+        private DateTime? ConvertLastViewed(int lastViewedAt)
+        {
+            DateTime? lastViewed = null;
+
+            if (lastViewedAt > 0)
+            {
+                DateTimeOffset dateTimeOffset = DateTimeOffset.FromUnixTimeSeconds(lastViewedAt);
+                lastViewed = DateTime.SpecifyKind(dateTimeOffset.DateTime, DateTimeKind.Utc);
+            }
+
+            return lastViewed.HasValue ? lastViewed.Value.ToLocalTime() : (DateTime?)null;
+        }
+
+        public MovieViewModel GetMovieByTitle(string fullOrPartialTitle)
+        {
+            List<MovieViewModel> movie = new List<MovieViewModel>();
+            var movieLibrary = GetMovieLibrary();
+            var metaData = movieLibrary.MediaContainer.Metadata.FirstOrDefault(movieLibrary => movieLibrary.Title.Contains(fullOrPartialTitle));
+
+            return new MovieViewModel() {
+                LastViewed = ConvertLastViewed(metaData.LastViewedAt),
+                MetaData = metaData
+            };
+        }
+
+        public List<MovieViewModel> GetMoviesByTitle(string fullOrPartialTitle)
+        {
+            List<MovieViewModel> movies = new List<MovieViewModel>();
+            var movieLibrary = GetMovieLibrary();
+
+            foreach (var movie in movieLibrary.MediaContainer.Metadata.Where(movieLibrary => movieLibrary.Title.Contains(fullOrPartialTitle)))
+            {
+                movies.Add(new MovieViewModel()
+                {
+                    LastViewed = ConvertLastViewed(movie.LastViewedAt),
+                    MetaData = movie
+                });
+            }
+
+            return movies;
+        }
+
+        public List<MovieViewModel> GetMoviesNotViewed(int days = 60)
+        {
+            List<MovieViewModel> movies = new List<MovieViewModel>();
+            var movieLibrary = GetMovieLibrary();
+
+            foreach (var movie in movieLibrary.MediaContainer.Metadata)
+            {
+                DateTime? lastViewed = ConvertLastViewed(movie.LastViewedAt);
+
+                if (!lastViewed.HasValue || lastViewed.Value < DateTime.UtcNow.AddDays(days * -1))
+                {
+                    movies.Add(new MovieViewModel()
+                    {
+                        LastViewed = lastViewed.HasValue ? lastViewed.Value.ToLocalTime() : (DateTime?)null,
+                        MetaData = movie
+                    });
+                }
+            }
+
+            return movies;
         }
     }
 }
