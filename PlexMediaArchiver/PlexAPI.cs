@@ -68,7 +68,7 @@ namespace PlexMediaArchiver
             plexUser = plexApi.SignIn(login, password).Result; 
         }
 
-        private Server GetPreferredServer()
+        public Server GetPreferredServer()
         {
             var servers = GetServers();
             var preferredServer = ConfigurationManager.AppSettings["PlexServer"];
