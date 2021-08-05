@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PlexMediaArchiver
+namespace PlexMediaArchiver.Classes.Model
 {
     public class MovieViewModel
     {

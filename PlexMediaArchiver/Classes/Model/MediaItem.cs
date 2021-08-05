@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace PlexMediaArchiver.Helpers
+namespace PlexMediaArchiver.Classes.Model
 {
     public class MediaItem
     {

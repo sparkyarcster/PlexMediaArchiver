@@ -13,8 +13,9 @@ using Plex.Api.Models;
 using Plex.Api.Models.Friends;
 using Plex.Api.Models.Server;
 using Plex.Api.Models.Status;
+using PlexMediaArchiver.Classes.Model;
 
-namespace PlexMediaArchiver
+namespace PlexMediaArchiver.API
 {
     public class PlexAPI
     {

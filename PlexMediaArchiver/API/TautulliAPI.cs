@@ -8,7 +8,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace PlexMediaArchiver
+namespace PlexMediaArchiver.API
 {
     public class TautulliAPI
     {
@@ -90,6 +90,21 @@ namespace PlexMediaArchiver
             return doAPIRequest<Tautulli.GetLibraries>("get_libraries").Response.Data;
         }
 
+        public List<User> GetUsers()
+        {
+            return doAPIRequest<Tautulli.GetUsers>("get_users").Response.Data;
+        }
+
+        public User GetUser(string ID, bool includeLastSeen = true)
+        {
+            return doAPIRequest<User>("get_user", new { user_id = ID, include_last_seen = includeLastSeen }, Method.POST);
+        }
+
+        public List<MediaInfoData> GetMetadata(string ratingKey)
+        {
+            return doAPIRequest<Tautulli.GetMetadata>("get_metadata", new { rating_key = ratingKey }, Method.POST).Response.Data.MediaInfo;
+        }
+
         private Library GetLibrary(string name)
         {
             return GetLibraries().FirstOrDefault(l => l.SectionName == name);
@@ -104,6 +119,7 @@ namespace PlexMediaArchiver
         {
             return GetLibrary("TV Shows");
         }
+
         public MediaInfo GetLibraryMediaInfoByRatingKey(string ratingKey = null, string sectionType = "movie", string orderColumn = "last_played",
                                                         string orderDir = null, int start = 0, int length = 25, string search = null)
         {
@@ -111,14 +127,15 @@ namespace PlexMediaArchiver
         }
 
         public MediaInfo GetLibraryMediaInfoBySectionID(string sectionID, string sectionType = "movie", string orderColumn = "last_played",
-                                                        string orderDir = null, int start = 0, int length = 25, string search = null)
+                                                        string orderDir = null, int start = 0, int length = 25, string search = null, bool loadDetailedMetaData = false)
         {
-            return GetLibraryMediaInfo(null, sectionID, sectionType, orderColumn, orderDir, start, length, search);
+            return GetLibraryMediaInfo(null, sectionID, sectionType, orderColumn, orderDir, start, length, search, loadDetailedMetaData);
         }
 
-        private MediaInfo GetLibraryMediaInfo(string ratingKey, string sectionID, string sectionType, string orderColumn, string orderDir, int start, int length, string search)
+        private MediaInfo GetLibraryMediaInfo(string ratingKey, string sectionID, string sectionType, string orderColumn, string orderDir, int start, int length, string search,
+            bool loadDetailedMetaData = false)
         {
-            return doAPIRequest<Tautulli.GetLibraryMediaInfo>("get_library_media_info", new
+            var resp = doAPIRequest<Tautulli.GetLibraryMediaInfo>("get_library_media_info", new
             {
                 section_id = sectionID,
                 rating_key = ratingKey,
@@ -129,6 +146,16 @@ namespace PlexMediaArchiver
                 length,
                 search
             }, Method.POST).Response.Data;
+
+            if (loadDetailedMetaData)
+            {
+                foreach (var media in resp.Data)
+                {
+                    media.DetailedMetaData = GetMetadata(media.rating_key);
+                }
+            }
+
+            return resp;
         }
     }
 }
