@@ -95,6 +95,8 @@ namespace PlexMediaArchiver
             }
 
             System.IO.File.WriteAllText(filePath, outputData.ToString());
+
+            Classes.AppLogger.log.Info($"Created {filePath}");
         }
     }
 }

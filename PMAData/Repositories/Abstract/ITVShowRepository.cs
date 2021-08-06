@@ -5,5 +5,6 @@ namespace PMAData.Repositories.Abstract
     public interface ITVShowRepository
     {
         void CreateOrUpdate(Model.TVShow tvshow);
+        int GetCount();
     }
 }

@@ -87,12 +87,26 @@ namespace PlexMediaArchiver.API
 
         public List<Library> GetLibraries()
         {
-            return doAPIRequest<Tautulli.GetLibraries>("get_libraries").Response.Data;
+            var resp = doAPIRequest<Tautulli.GetLibraries>("get_libraries");
+
+            if (!string.IsNullOrEmpty(resp.Response.Error))
+            {
+                Classes.AppLogger.log.Error($"GetLibraries: {resp.Response.Error}");
+            }
+
+            return resp.Response.Data;
         }
 
         public List<User> GetUsers()
         {
-            return doAPIRequest<Tautulli.GetUsers>("get_users").Response.Data;
+            var resp = doAPIRequest<Tautulli.GetUsers>("get_users");
+
+            if (!string.IsNullOrEmpty(resp.Response.Error))
+            {
+                Classes.AppLogger.log.Error($"GetUsers: {resp.Response.Error}");
+            }
+
+            return resp.Response.Data;
         }
 
         public User GetUser(string ID, bool includeLastSeen = true)
@@ -102,7 +116,14 @@ namespace PlexMediaArchiver.API
 
         public List<MediaInfoData> GetMetadata(string ratingKey)
         {
-            return doAPIRequest<Tautulli.GetMetadata>("get_metadata", new { rating_key = ratingKey }, Method.POST).Response.Data.MediaInfo;
+            var resp = doAPIRequest<Tautulli.GetMetadata>("get_metadata", new { rating_key = ratingKey }, Method.POST);
+
+            if (!string.IsNullOrEmpty(resp.Response.Error))
+            {
+                Classes.AppLogger.log.Error($"GetMetadata: {ratingKey}: {resp.Response.Error}");
+            }
+
+            return resp.Response.Data.MediaInfo;
         }
 
         private Library GetLibrary(string name)
@@ -144,18 +165,72 @@ namespace PlexMediaArchiver.API
                 order_dir = orderDir,
                 start,
                 length,
-                search
-            }, Method.POST).Response.Data;
+                search,
+                refresh = true
+            }, Method.POST);
+
+            if (!string.IsNullOrEmpty(resp.Response.Error))
+            {
+                Classes.AppLogger.log.Error($"GetLibraryMediaInfo: {resp.Response.Error}");
+            }
 
             if (loadDetailedMetaData)
             {
-                foreach (var media in resp.Data)
+                Classes.AppLogger.log.Info("Loading detailed metadata...");
+                var counter = 0;
+                var totalCount = resp.Response.Data.Data.Count();
+
+                foreach (var media in resp.Response.Data.Data)
                 {
-                    media.DetailedMetaData = GetMetadata(media.rating_key);
+                    media.DetailedMetaData = DoGetMetaData(media.rating_key);
+                    counter++;
+
+                    if (counter % 25 == 0)
+                    {
+                        Classes.AppLogger.log.Info($"{counter} / {totalCount}");
+                    }
+
+                    if (counter % 100 == 0)
+                    {
+                        Classes.AppLogger.log.Info("Let the service catch up for a moment...");
+                        System.Threading.Thread.Sleep(5000);
+                    }
+                    else
+                    {
+                        System.Threading.Thread.Sleep(500);
+                    }
                 }
             }
 
-            return resp;
+            return resp.Response.Data;
+        }
+
+        private List<MediaInfoData> DoGetMetaData(string rating_key, int retry = 0)
+        {
+            List<MediaInfoData> metaData = null;
+
+            try
+            {
+                metaData = GetMetadata(rating_key);
+
+                if (metaData == null)
+                {
+                    throw new Exception($"Metadata for {rating_key} was null.");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                if (retry < 3)
+                {
+                    return DoGetMetaData(rating_key, retry + 1);
+                }
+                else
+                {
+                    Classes.AppLogger.log.Error(ex, $"Issue getting metadata for {rating_key}.");
+                }
+            }
+
+            return metaData;
         }
     }
 }

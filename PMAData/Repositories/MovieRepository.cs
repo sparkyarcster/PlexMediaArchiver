@@ -8,7 +8,7 @@ namespace PMAData.Repositories
 {
     public class MovieRepository : BaseRepository, IMovieRepository
     {
-        public MovieRepository(Database.DatabaseConfig databaseConfig) : base(databaseConfig) { }
+        public MovieRepository(Database.DatabaseConfig databaseConfig, NLog.Logger logger) : base(databaseConfig, logger) { }
 
         public void CreateOrUpdate(Movie movie)
         {
@@ -54,13 +54,18 @@ namespace PMAData.Repositories
             }
             catch (System.Exception ex)
             {
-                System.Console.WriteLine($"Error: {movie.Title} -- {ex.Message}");
+                logger.Error(ex, $"Error: {movie.Title}");
 
                 if (ex.Message.Contains(" locked"))
                 {
                     if (retry < 3)
                     {
+                        logger.Info($"Retrying...");
                         DoCreateOrUpdate(movie, retry + 1);
+                    }
+                    else
+                    {
+                        logger.Error($"Fatal error: {movie.Title}");
                     }
                 }
             }
@@ -90,7 +95,7 @@ SELECT Movie.*
          ON Movie.ID = GenericData.MediaID
  WHERE GenericData.MediaType = 'movie'
    AND GenericData.DataKey = 'Video Codec'
-   AND GenericData.DataValue = '{codec}'").ToList();
+   AND GenericData.DataValue LIKE '%{codec}%'").ToList();
 
             foreach (var movie in movies)
             {
@@ -98,6 +103,24 @@ SELECT Movie.*
             }
 
             return movies;
+        }
+
+        public int GetCount()
+        {
+            if (!databaseConfig.HasConnection)
+            {
+                return 0;
+            }
+
+            try
+            {
+                return databaseConfig.Connection.Query<int>(@$"SELECT COUNT(1) FROM Movie").FirstOrDefault();
+            }
+            catch (System.Exception ex)
+            {
+                logger.Error(ex);
+                return -1;
+            }
         }
     }
 }

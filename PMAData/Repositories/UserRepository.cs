@@ -7,7 +7,7 @@ namespace PMAData.Repositories
 {
     public class UserRepository : BaseRepository, IUserRepository
     {
-        public UserRepository(Database.DatabaseConfig databaseConfig) : base(databaseConfig) { }
+        public UserRepository(Database.DatabaseConfig databaseConfig, NLog.Logger logger) : base(databaseConfig, logger) { }
 
         public void CreateOrUpdate(User user)
         {
@@ -53,15 +53,38 @@ namespace PMAData.Repositories
             }
             catch (System.Exception ex)
             {
-                System.Console.WriteLine($"Error: {user.UserName} -- {ex.Message}");
+                logger.Error(ex, $"Error: {user.UserName}");
 
                 if (ex.Message.Contains(" locked"))
                 {
                     if (retry < 3)
                     {
+                        logger.Info($"Retrying...");
                         DoCreateOrUpdate(user, retry + 1);
                     }
+                    else
+                    {
+                        logger.Error($"Fatal error: {user.UserName}");
+                    }
                 }
+            }
+        }
+
+        public int GetCount()
+        {
+            if (!databaseConfig.HasConnection)
+            {
+                return 0;
+            }
+
+            try
+            {
+                return databaseConfig.Connection.Query<int>(@$"SELECT COUNT(1) FROM User").FirstOrDefault();
+            }
+            catch (System.Exception ex)
+            {
+                logger.Error(ex);
+                return -1;
             }
         }
     }

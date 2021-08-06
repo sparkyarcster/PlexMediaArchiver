@@ -7,7 +7,7 @@ namespace PMAData.Repositories
 {
     public class TVShowRepository : BaseRepository, ITVShowRepository
     {
-        public TVShowRepository(Database.DatabaseConfig databaseConfig) : base(databaseConfig) { }
+        public TVShowRepository(Database.DatabaseConfig databaseConfig, NLog.Logger logger) : base(databaseConfig, logger) { }
 
         public void CreateOrUpdate(TVShow tvshow)
         {
@@ -53,15 +53,38 @@ namespace PMAData.Repositories
             }
             catch (System.Exception ex)
             {
-                System.Console.WriteLine($"Error: {tvshow.Title} -- {ex.Message}");
+                logger.Error(ex, $"Error: {tvshow.Title}");
 
                 if (ex.Message.Contains(" locked"))
                 {
                     if (retry < 3)
                     {
+                        logger.Info($"Retrying...");
                         DoCreateOrUpdate(tvshow, retry + 1);
                     }
+                    else
+                    {
+                        logger.Error($"Fatal error: {tvshow.Title}");
+                    }
                 }
+            }
+        }
+
+        public int GetCount()
+        {
+            if (!databaseConfig.HasConnection)
+            {
+                return 0;
+            }
+
+            try
+            {
+                return databaseConfig.Connection.Query<int>(@$"SELECT COUNT(1) FROM TVShow").FirstOrDefault();
+            }
+            catch (System.Exception ex)
+            {
+                logger.Error(ex);
+                return -1;
             }
         }
     }

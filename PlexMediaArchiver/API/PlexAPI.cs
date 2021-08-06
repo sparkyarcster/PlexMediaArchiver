@@ -164,7 +164,7 @@ namespace PlexMediaArchiver.API
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Classes.AppLogger.log.Error(ex);
                 return null;
             }
         }

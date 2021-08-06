@@ -19,9 +19,9 @@ namespace PlexMediaArchiver.Classes
 
             DatabaseBootstrap.Setup();
 
-            TVShowRepository = new PMAData.Repositories.TVShowRepository(DatabaseConfig);
-            MovieRepository = new PMAData.Repositories.MovieRepository(DatabaseConfig);
-            UserRepository = new PMAData.Repositories.UserRepository(DatabaseConfig);
+            TVShowRepository = new PMAData.Repositories.TVShowRepository(DatabaseConfig, Classes.AppLogger.log);
+            MovieRepository = new PMAData.Repositories.MovieRepository(DatabaseConfig, Classes.AppLogger.log);
+            UserRepository = new PMAData.Repositories.UserRepository(DatabaseConfig, Classes.AppLogger.log);
         }
 
         public static void Reset()

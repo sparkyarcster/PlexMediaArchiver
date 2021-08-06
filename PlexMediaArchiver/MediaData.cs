@@ -30,7 +30,7 @@ namespace PlexMediaArchiver
 
         public void LoadData()
         {
-            Console.WriteLine("Getting server information...");
+            Classes.AppLogger.log.Info("Getting server information...");
 
             var plexAPI = new PlexAPI();
             var plexServer = plexAPI.GetPreferredServer();
@@ -39,58 +39,73 @@ namespace PlexMediaArchiver
             {
                 var tautulliAPI = new TautulliAPI(plexServer);
 
-                Console.WriteLine("Getting Movies...");
+                Classes.AppLogger.log.Info("Getting Movies...");
 
                 var movieLibrary = tautulliAPI.GetMovieLibrary();
-                var movies = tautulliAPI.GetLibraryMediaInfoBySectionID(movieLibrary.SectionID, sectionType: movieLibrary.SectionType, length: movieLibrary.Count, loadDetailedMetaData: true);
-                var taskList = new List<Action>();
+                var movies = tautulliAPI.GetLibraryMediaInfoBySectionID(movieLibrary.SectionID, sectionType: movieLibrary.SectionType, length: movieLibrary.Count * 2, loadDetailedMetaData: false);
+                var itemCounter = 0;
+                var totalCount = movies.Data.Count();
+
+                Classes.AppLogger.log.Info("Saving Movie Data...");
 
                 foreach (var movie in movies.Data)
                 {
-                    taskList.Add(() =>
+                    IndexMovie(movie);
+
+                    itemCounter++;
+
+                    if (itemCounter % 100 == 0)
                     {
-                        IndexMovie(movie);
-                    });                    
+                        Classes.AppLogger.log.Info($"{itemCounter} / {totalCount}");
+                    }
                 }
 
-                Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 25 }, taskList.ToArray());
-
-                Console.WriteLine("Getting TV Shows...");
+                Classes.AppLogger.log.Info("Getting TV Shows...");
 
                 var tvLibraryLibrary = tautulliAPI.GetTVLibrary();
-                var tvshows = tautulliAPI.GetLibraryMediaInfoBySectionID(tvLibraryLibrary.SectionID, sectionType: tvLibraryLibrary.SectionType, length: tvLibraryLibrary.Count);
-                taskList = new List<Action>();
+                var tvshows = tautulliAPI.GetLibraryMediaInfoBySectionID(tvLibraryLibrary.SectionID, sectionType: tvLibraryLibrary.SectionType, length: tvLibraryLibrary.Count * 2);
+                itemCounter = 0;
+                totalCount = tvshows.Data.Count();
+
+                Classes.AppLogger.log.Info("Saving TV Show Data...");
 
                 foreach (var tvshow in tvshows.Data)
                 {
-                    taskList.Add(() =>
+                    IndexTVShow(tvshow);
+
+                    itemCounter++;
+
+                    if (itemCounter % 25 == 0)
                     {
-                        IndexTVShow(tvshow);
-                    });
+                        Classes.AppLogger.log.Info($"{itemCounter} / {totalCount}");
+                    }
                 }
 
-                Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 15 }, taskList.ToArray());
-
-                Console.WriteLine("Getting Users...");
+                Classes.AppLogger.log.Info("Getting Users...");
 
                 var users = tautulliAPI.GetUsers();
-                taskList = new List<Action>();
+                itemCounter = 0;
+                totalCount = users.Count();
+
+                Classes.AppLogger.log.Info("Saving User Data...");
 
                 foreach (var user in users)
                 {
                     var userData = tautulliAPI.GetUser(user.UserID.ToString());
 
-                    taskList.Add(() =>
-                    {
-                        IndexUser(user, userData);
-                    });
-                }
+                    IndexUser(user, userData);
 
-                Parallel.Invoke(new ParallelOptions() { MaxDegreeOfParallelism = 5 }, taskList.ToArray());
+                    itemCounter++;
+
+                    if (itemCounter % 10 == 0)
+                    {
+                        Classes.AppLogger.log.Info($"{itemCounter} / {totalCount}");
+                    }
+                }
             }
             else
             {
-                Console.WriteLine("Could not locate preferred Plex server.");
+                Classes.AppLogger.log.Error("Could not locate preferred Plex server.");
             }
         }
 
@@ -106,7 +121,7 @@ namespace PlexMediaArchiver
                 LastPlayed = lastViewed
             };
 
-            if (movie.DetailedMetaData.Any())
+            if (movie.DetailedMetaData != null && movie.DetailedMetaData.Any())
             {
                 mediaItem.GenericData.Add(new PMAData.Model.GenericData()
                 {
@@ -114,7 +129,18 @@ namespace PlexMediaArchiver
                     MediaID = mediaItem.ID,
                     MediaType = "movie",
                     DataKey = "Video Codec",
-                    DataValue = movie.DetailedMetaData.First().video_codec
+                    DataValue = string.Join(",", movie.DetailedMetaData.Select(m => m.video_codec))
+                });
+            }
+            else
+            {
+                mediaItem.GenericData.Add(new PMAData.Model.GenericData()
+                {
+                    ID = Guid.NewGuid(),
+                    MediaID = mediaItem.ID,
+                    MediaType = "movie",
+                    DataKey = "Video Codec",
+                    DataValue = movie.video_codec
                 });
             }
 
@@ -167,7 +193,7 @@ namespace PlexMediaArchiver
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Classes.AppLogger.log.Error(ex.Message);
                 return null;
             }
         }
