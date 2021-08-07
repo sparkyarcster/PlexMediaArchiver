@@ -55,19 +55,47 @@ namespace PlexMediaArchiver
 
             var reportBuilder = new ReportBuilder();
 
-            reportBuilder.BuildReport(mediaData.GetMovies(Classes.Enum.MediaCodec.hevc).Select(m => new
+            var hevcData = mediaData.GetMovies(Classes.Enum.MediaCodec.hevc).Select(m => new
             {
                 Movie = m.Title,
                 Year = m.Year,
-                Codec = m.GenericData.FirstOrDefault(d => d.DataKey == "Video Codec").DataValue
-            }).OrderBy(m => m.Movie).ThenBy(m => m.Year).ToList(), "hevc");
+                Codec = m.GenericData.FirstOrDefault(d => d.DataKey == "Video Codec").DataValue,
+                Container = m.GenericData.FirstOrDefault(d => d.DataKey == "Container").DataValue
+            });
 
-            reportBuilder.BuildReport(mediaData.GetMovies(Classes.Enum.MediaCodec.mpeg4).Select(m => new
+            if (hevcData.Count() > 0)
+            {
+                reportBuilder.BuildReport(hevcData.OrderBy(m => m.Movie).ThenBy(m => m.Year).ToList(), "hevc");
+            }
+
+            var mpeg4Data = mediaData.GetMovies(Classes.Enum.MediaCodec.mpeg4).Select(m => new
             {
                 Movie = m.Title,
                 Year = m.Year,
-                Codec = m.GenericData.FirstOrDefault(d => d.DataKey == "Video Codec").DataValue
-            }).OrderBy(m => m.Movie).ThenBy(m => m.Year).ToList(), "mpeg4");
+                Codec = m.GenericData.FirstOrDefault(d => d.DataKey == "Video Codec").DataValue,
+                Container = m.GenericData.FirstOrDefault(d => d.DataKey == "Container").DataValue
+            });
+
+            if (mpeg4Data.Count() > 0)
+            {
+                reportBuilder.BuildReport(mpeg4Data.OrderBy(m => m.Movie).ThenBy(m => m.Year).ToList(), "mpeg4");
+            }
+
+            var aviData = mediaData.GetMovies(Classes.Enum.Container.avi).Select(m => new
+            {
+                Movie = m.Title,
+                Year = m.Year,
+                Codec = m.GenericData.FirstOrDefault(d => d.DataKey == "Video Codec").DataValue,
+                Container = m.GenericData.FirstOrDefault(d => d.DataKey == "Container").DataValue
+            });
+
+            if (aviData.Count() > 0)
+            {
+                reportBuilder.BuildReport(aviData.OrderBy(m => m.Movie).ThenBy(m => m.Year).ToList(), "avi");
+            }
+
+            //TODO: Not watched
+            //TODO: TV Show Reports
         }
     }
 }

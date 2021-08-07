@@ -7,6 +7,7 @@ namespace PMAData.Repositories.Abstract
         void CreateOrUpdate(Model.Movie movie);
         List<Model.Movie> GetMovies();
         List<Model.Movie> GetMoviesByCodec(string codec);
+        List<Model.Movie> GetMoviesByContainer(string codec);
         int GetCount();
     }
 }

@@ -16,16 +16,19 @@ namespace PlexMediaArchiver
         {
         }
 
-        public List<PMAData.Model.Movie> GetMovies(Classes.Enum.MediaCodec? mediaCodec = null)
+        public List<PMAData.Model.Movie> GetMovies()
         {
-            if (mediaCodec.HasValue)
-            {
-                return Classes.Database.MovieRepository.GetMoviesByCodec(mediaCodec.ToString());
-            }
-            else
-            {
-                return Classes.Database.MovieRepository.GetMovies();
-            }
+            return Classes.Database.MovieRepository.GetMovies();
+        }
+
+        public List<PMAData.Model.Movie> GetMovies(Classes.Enum.MediaCodec mediaCodec)
+        {
+            return Classes.Database.MovieRepository.GetMoviesByCodec(mediaCodec.ToString());
+        }
+
+        public List<PMAData.Model.Movie> GetMovies(Classes.Enum.Container container)
+        {
+            return Classes.Database.MovieRepository.GetMoviesByContainer(container.ToString());
         }
 
         public void LoadData()
@@ -120,6 +123,15 @@ namespace PlexMediaArchiver
                 Year = movie.year,
                 LastPlayed = lastViewed
             };
+
+            mediaItem.GenericData.Add(new PMAData.Model.GenericData()
+            {
+                ID = Guid.NewGuid(),
+                MediaID = mediaItem.ID,
+                MediaType = "movie",
+                DataKey = "Container",
+                DataValue = movie.container
+            });
 
             if (movie.DetailedMetaData != null && movie.DetailedMetaData.Any())
             {

@@ -83,6 +83,16 @@ namespace PMAData.Repositories
 
         public List<Movie> GetMoviesByCodec(string codec)
         {
+            return GetMoviesByGenericData("Video Codec", codec);
+        }
+
+        public List<Movie> GetMoviesByContainer(string container)
+        {
+            return GetMoviesByGenericData("Container", container);
+        }
+
+        private List<Movie> GetMoviesByGenericData(string dataKey, string dataValue)
+        {
             if (!databaseConfig.HasConnection)
             {
                 return new List<Movie>();
@@ -94,8 +104,8 @@ SELECT Movie.*
  INNER JOIN GenericData
          ON Movie.ID = GenericData.MediaID
  WHERE GenericData.MediaType = 'movie'
-   AND GenericData.DataKey = 'Video Codec'
-   AND GenericData.DataValue LIKE '%{codec}%'").ToList();
+   AND GenericData.DataKey = '{dataKey}'
+   AND GenericData.DataValue LIKE '%{dataValue}%'").ToList();
 
             foreach (var movie in movies)
             {
