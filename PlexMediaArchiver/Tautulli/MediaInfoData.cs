@@ -8,14 +8,14 @@ namespace PlexMediaArchiver.Tautulli
     public class MediaInfoData
     {
         [JsonProperty("added_at", NullValueHandling = NullValueHandling.Ignore)]
-        public string added_at { get; set; }
+        public int? added_at { get; set; }
         [JsonProperty("audio_channels", NullValueHandling = NullValueHandling.Ignore)]
         public string audio_channels { get; set; }
         [JsonProperty("audio_codec", NullValueHandling = NullValueHandling.Ignore)]
         public string audio_codec { get; set; }
         [JsonProperty("bitrate", NullValueHandling = NullValueHandling.Ignore)]
         public string bitrate { get; set; }
-        [JsonProperty("dcontainerraw", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("container", NullValueHandling = NullValueHandling.Ignore)]
         public string container { get; set; }
         [JsonProperty("file_size", NullValueHandling = NullValueHandling.Ignore)]
         public int? file_size { get; set; }

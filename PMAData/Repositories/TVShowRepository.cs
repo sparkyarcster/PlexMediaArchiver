@@ -26,11 +26,11 @@ namespace PMAData.Repositories
 
                     if (dbTVShow != null)
                     {
-                        sql = "UPDATE TVShow SET Title = @Title, Year = @Year, LastPlayed = @LastPlayed WHERE ID = @ID;";
+                        sql = "UPDATE TVShow SET Title = @Title, Year = @Year, LastPlayed = @LastPlayed, Added = @Added WHERE ID = @ID;";
                     }
                     else
                     {
-                        sql = "INSERT INTO TVShow (ID, Title, Year, LastPlayed) VALUES (@ID, @Title, @Year, @LastPlayed);";
+                        sql = "INSERT INTO TVShow (ID, Title, Year, LastPlayed, Added) VALUES (@ID, @Title, @Year, @LastPlayed, @Added);";
                     }
 
                     if (!string.IsNullOrEmpty(sql))

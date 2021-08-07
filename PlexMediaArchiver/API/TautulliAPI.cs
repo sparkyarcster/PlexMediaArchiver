@@ -30,13 +30,13 @@ namespace PlexMediaArchiver.API
 
         private void SetFullURLAndAPIKey(string baseURL)
         {
-            var port = ConfigurationManager.AppSettings["TautulliPort"] ?? "";
+            var port = Classes.Constants.TautulliPort;
 
             baseURL = baseURL.Trim('/');
 
             tautulliUrl = $"{(!baseURL.Contains("http") ? "http://" : "")}{baseURL}:{port}";
 
-            apiKey = ConfigurationManager.AppSettings["TautulliAPIKey"] ?? "";
+            apiKey = Classes.Constants.TautulliAPIKey;
         }
 
         private T deserializeJSON<T>(string json)
@@ -176,7 +176,7 @@ namespace PlexMediaArchiver.API
 
             if (loadDetailedMetaData)
             {
-                Classes.AppLogger.log.Info("Loading detailed metadata...");
+                Classes.AppLogger.log.Info("Loading detailed metadata, this may take a while...");
                 var counter = 0;
                 var totalCount = resp.Response.Data.Data.Count();
 

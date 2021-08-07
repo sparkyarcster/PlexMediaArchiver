@@ -1,4 +1,4 @@
-﻿using System.Configuration;
+﻿using System;
 using System.Linq;
 
 namespace PlexMediaArchiver
@@ -9,30 +9,17 @@ namespace PlexMediaArchiver
         {
             Classes.AppLogger.Setup();
 
-            bool resetDatabase;
-            var configReset = ConfigurationManager.AppSettings["RefreshDatabase"];
-
-            if (!string.IsNullOrEmpty(configReset))
-            {
-                if (!bool.TryParse(configReset, out resetDatabase))
-                {
-                    resetDatabase = false;
-                }
-            }
-            else
-            {
-                resetDatabase = false;
-            }
+            bool resetDatabase = Classes.Constants.RefreshDatabase;
 
             if (resetDatabase)
             {
-                System.Console.WriteLine("Are you sure you want to reset the database? Y/N");
+                Console.WriteLine("Are you sure you want to reset the database? Y/N");
 
-                var confirm = System.Console.ReadKey();
+                var confirm = Console.ReadKey();
 
-                System.Console.WriteLine("");
+                Console.WriteLine("");
 
-                if (confirm.Key == System.ConsoleKey.Y)
+                if (confirm.Key == ConsoleKey.Y)
                 {
                     Classes.Database.Reset();
                 }
@@ -66,6 +53,7 @@ namespace PlexMediaArchiver
             if (hevcData.Count() > 0)
             {
                 reportBuilder.BuildReport(hevcData.OrderBy(m => m.Movie).ThenBy(m => m.Year).ToList(), "hevc");
+                hevcData = null;
             }
 
             var mpeg4Data = mediaData.GetMovies(Classes.Enum.MediaCodec.mpeg4).Select(m => new
@@ -79,6 +67,7 @@ namespace PlexMediaArchiver
             if (mpeg4Data.Count() > 0)
             {
                 reportBuilder.BuildReport(mpeg4Data.OrderBy(m => m.Movie).ThenBy(m => m.Year).ToList(), "mpeg4");
+                mpeg4Data = null;
             }
 
             var aviData = mediaData.GetMovies(Classes.Enum.Container.avi).Select(m => new
@@ -92,9 +81,29 @@ namespace PlexMediaArchiver
             if (aviData.Count() > 0)
             {
                 reportBuilder.BuildReport(aviData.OrderBy(m => m.Movie).ThenBy(m => m.Year).ToList(), "avi");
+                aviData = null;
             }
 
-            //TODO: Not watched
+            var movieIgnoreDate = DateTime.Now.AddDays(Classes.Constants.IgnoreMoviesLessThanDaysOld * -1);
+            var movieCompareDate = DateTime.Now.AddDays(Classes.Constants.MovieAge * -1);
+
+            var notWatchedMovies = mediaData.GetMovies()
+                .Where(m => ((m.Added.HasValue && m.Added.Value < movieIgnoreDate) || (!m.Added.HasValue))
+                    && (!m.LastPlayed.HasValue || m.LastPlayed.Value < movieCompareDate))
+                .Select(m => new
+            {
+                Movie = m.Title,
+                Year = m.Year,
+                DateAdded = m.Added,
+                LastPlayed = m.LastPlayed
+            });
+
+            if (notWatchedMovies.Count() > 0)
+            {
+                reportBuilder.BuildReport(notWatchedMovies.OrderBy(m => m.Movie).ThenBy(m => m.Year).ToList(), "movies_stale");
+                notWatchedMovies = null;
+            }
+
             //TODO: TV Show Reports
         }
     }

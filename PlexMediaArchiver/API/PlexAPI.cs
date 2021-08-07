@@ -63,8 +63,8 @@ namespace PlexMediaArchiver.API
         {
             plexApi = ServiceProvider.GetService<IPlexClient>();
 
-            var login = ConfigurationManager.AppSettings["PlexLogin"];
-            var password = ConfigurationManager.AppSettings["PlexPassword"];
+            var login = Classes.Constants.PlexLogin;
+            var password = Classes.Constants.PlexPassword;
 
             plexUser = plexApi.SignIn(login, password).Result; 
         }
@@ -72,7 +72,7 @@ namespace PlexMediaArchiver.API
         public Server GetPreferredServer()
         {
             var servers = GetServers();
-            var preferredServer = ConfigurationManager.AppSettings["PlexServer"];
+            var preferredServer = Classes.Constants.PlexServer;
 
             if (servers.Any())
             {

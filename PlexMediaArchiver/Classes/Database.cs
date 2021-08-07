@@ -14,7 +14,7 @@ namespace PlexMediaArchiver.Classes
 
         public static void Setup()
         {
-            DatabaseConfig = new PMAData.Database.DatabaseConfig() { Name = ConfigurationManager.AppSettings["DatabaseName"] };
+            DatabaseConfig = new PMAData.Database.DatabaseConfig() { Name = Classes.Constants.DatabaseName };
             DatabaseBootstrap = new PMAData.Database.DatabaseBootstrap(DatabaseConfig);
 
             DatabaseBootstrap.Setup();
@@ -26,7 +26,7 @@ namespace PlexMediaArchiver.Classes
 
         public static void Reset()
         {
-            var dbName = ConfigurationManager.AppSettings["DatabaseName"];
+            var dbName = Classes.Constants.DatabaseName;
 
             if (string.IsNullOrEmpty(dbName))
             {
