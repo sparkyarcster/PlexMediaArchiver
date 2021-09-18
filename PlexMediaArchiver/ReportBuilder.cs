@@ -23,11 +23,11 @@ namespace PlexMediaArchiver
             }
         }
 
-        public void BuildReport<T>(List<T> dataSet, string reportName = "")
+        public string BuildReport<T>(List<T> dataSet, string reportName = "")
         {
             if (dataSet == null || !dataSet.Any())
             {
-                return;
+                return null;
             }
 
             if (!string.IsNullOrEmpty(reportName))
@@ -73,7 +73,11 @@ namespace PlexMediaArchiver
 
                         if (value != null)
                         {
-                            if (value.ToString().Contains(","))
+                            if(property.Name == "MediaSize" || property.Name == "FileSize")
+                            {
+                                outputData.Append($"{(int.Parse(value.ToString()) / 1000)}");
+                            }
+                            else if (value.ToString().Contains(","))
                             {
                                 outputData.Append($"\"{value}\"");
                             }
@@ -97,6 +101,8 @@ namespace PlexMediaArchiver
             System.IO.File.WriteAllText(filePath, outputData.ToString());
 
             Classes.AppLogger.log.Info($"Created {filePath}");
+
+            return filePath;
         }
     }
 }

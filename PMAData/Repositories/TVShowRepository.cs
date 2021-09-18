@@ -2,6 +2,7 @@
 using PMAData.Repositories.Abstract;
 using Dapper;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace PMAData.Repositories
 {
@@ -26,11 +27,11 @@ namespace PMAData.Repositories
 
                     if (dbTVShow != null)
                     {
-                        sql = "UPDATE TVShow SET Title = @Title, Year = @Year, LastPlayed = @LastPlayed, Added = @Added WHERE ID = @ID;";
+                        sql = "UPDATE TVShow SET Title = @Title, Year = @Year, LastPlayed = @LastPlayed, Added = @Added, FileSize = @FileSize WHERE ID = @ID;";
                     }
                     else
                     {
-                        sql = "INSERT INTO TVShow (ID, Title, Year, LastPlayed, Added) VALUES (@ID, @Title, @Year, @LastPlayed, @Added);";
+                        sql = "INSERT INTO TVShow (ID, Title, Year, LastPlayed, Added, FileSize) VALUES (@ID, @Title, @Year, @LastPlayed, @Added, @FileSize);";
                     }
 
                     if (!string.IsNullOrEmpty(sql))
@@ -86,6 +87,16 @@ namespace PMAData.Repositories
                 logger.Error(ex);
                 return -1;
             }
+        }
+
+        public List<TVShow> GetTVShows()
+        {
+            if (!databaseConfig.HasConnection)
+            {
+                return new List<TVShow>();
+            }
+
+            return databaseConfig.Connection.Query<TVShow>($"SELECT * FROM TVShow").ToList();
         }
     }
 }

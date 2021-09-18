@@ -139,5 +139,13 @@ namespace PlexMediaArchiver.Classes
 
             return defaultValue;
         }
+
+        public static string ReportLocation
+        {
+            get
+            {
+                return GetSettingValue("ReportLocation", "");
+            }
+        }
     }
 }

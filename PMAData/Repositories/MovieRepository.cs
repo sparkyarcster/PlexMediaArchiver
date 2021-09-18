@@ -27,11 +27,11 @@ namespace PMAData.Repositories
 
                     if (dbMovie != null)
                     {
-                        sql = "UPDATE Movie SET Title = @Title, Year = @Year, LastPlayed = @LastPlayed, Added = @Added WHERE ID = @ID;";
+                        sql = "UPDATE Movie SET Title = @Title, Year = @Year, LastPlayed = @LastPlayed, Added = @Added, FileSize = @FileSize WHERE ID = @ID;";
                     }
                     else
                     {
-                        sql = "INSERT INTO Movie (ID, Title, Year, LastPlayed, Added) VALUES (@ID, @Title, @Year, @LastPlayed, @Added);";
+                        sql = "INSERT INTO Movie (ID, Title, Year, LastPlayed, Added, FileSize) VALUES (@ID, @Title, @Year, @LastPlayed, @Added, @FileSize);";
                     }
 
                     if (!string.IsNullOrEmpty(sql))

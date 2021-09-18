@@ -6,5 +6,6 @@ namespace PMAData.Repositories.Abstract
     {
         void CreateOrUpdate(Model.TVShow tvshow);
         int GetCount();
+        List<Model.TVShow> GetTVShows();
     }
 }

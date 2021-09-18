@@ -31,6 +31,11 @@ namespace PlexMediaArchiver
             return Classes.Database.MovieRepository.GetMoviesByContainer(container.ToString());
         }
 
+        public List<PMAData.Model.TVShow> GetTVShows()
+        {
+            return Classes.Database.TVShowRepository.GetTVShows();
+        }
+
         public void LoadData()
         {
             Classes.AppLogger.log.Info("Getting server information...");
@@ -123,7 +128,8 @@ namespace PlexMediaArchiver
                 Title = movie.title,
                 Year = movie.year,
                 LastPlayed = lastViewed,
-                Added = dataAdded
+                Added = dataAdded,
+                FileSize = movie.file_size ?? 0
             };
 
             mediaItem.GenericData.Add(new PMAData.Model.GenericData()
@@ -172,7 +178,8 @@ namespace PlexMediaArchiver
                 Title = tvshow.title,
                 Year = tvshow.year,
                 LastPlayed = lastViewed,
-                Added = dataAdded
+                Added = dataAdded,
+                FileSize = tvshow.file_size ?? 0
             };
 
             Classes.Database.TVShowRepository.CreateOrUpdate(mediaItem);

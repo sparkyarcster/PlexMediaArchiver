@@ -11,6 +11,7 @@ namespace PMAData.Model
         public string Year { get; set; }
         public DateTime? LastPlayed { get; set; }
         public DateTime? Added { get; set; }
+        public int FileSize { get; set; }
         public List<GenericData> GenericData { get; set; }
 
         public MediaItem()
