@@ -9,6 +9,7 @@ namespace PlexMediaArchiver
         static void Main(string[] args)
         {
             Classes.AppLogger.Setup();
+            Classes.Mapper.Configure();
 
             bool resetDatabase = Classes.Constants.RefreshDatabase;
 

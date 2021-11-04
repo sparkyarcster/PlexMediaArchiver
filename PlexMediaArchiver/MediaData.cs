@@ -119,18 +119,7 @@ namespace PlexMediaArchiver
 
         private void IndexMovie(Tautulli.MediaInfoData movie)
         {
-            var lastViewed = ConvertLastViewed(movie.last_played ?? 0);
-            var dataAdded = ConvertLastViewed(movie.added_at ?? 0);
-
-            var mediaItem = new PMAData.Model.Movie()
-            {
-                ID = int.Parse(movie.rating_key),
-                Title = movie.title,
-                Year = movie.year,
-                LastPlayed = lastViewed,
-                Added = dataAdded,
-                FileSize = movie.file_size ?? 0
-            };
+            var mediaItem = Classes.Mapper.mapper.Map<PMAData.Model.Movie>(movie);
 
             mediaItem.GenericData.Add(new PMAData.Model.GenericData()
             {
@@ -169,18 +158,7 @@ namespace PlexMediaArchiver
 
         private void IndexTVShow(Tautulli.MediaInfoData tvshow)
         {
-            var lastViewed = ConvertLastViewed(tvshow.last_played ?? 0);
-            var dataAdded = ConvertLastViewed(tvshow.added_at ?? 0);
-
-            var mediaItem = new PMAData.Model.TVShow()
-            {
-                ID = int.Parse(tvshow.rating_key),
-                Title = tvshow.title,
-                Year = tvshow.year,
-                LastPlayed = lastViewed,
-                Added = dataAdded,
-                FileSize = tvshow.file_size ?? 0
-            };
+            var mediaItem = Classes.Mapper.mapper.Map<PMAData.Model.TVShow>(tvshow);
 
             Classes.Database.TVShowRepository.CreateOrUpdate(mediaItem);
         }
