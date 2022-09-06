@@ -122,6 +122,7 @@ namespace PlexMediaArchiver
                     TVShow = s.Title,
                     Year = s.Year,
                     MediaSize = s.FileSize,
+                    Episodes = s.GenericData.FirstOrDefault(d => d.DataKey == "Episodes")?.DataValue ?? "0",
                     DateAdded = s.Added,
                     LastPlayed = s.LastPlayed
                 });

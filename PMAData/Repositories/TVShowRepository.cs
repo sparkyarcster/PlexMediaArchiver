@@ -96,7 +96,14 @@ namespace PMAData.Repositories
                 return new List<TVShow>();
             }
 
-            return databaseConfig.Connection.Query<TVShow>($"SELECT * FROM TVShow").ToList();
+            var tvShows = databaseConfig.Connection.Query<TVShow>($"SELECT * FROM TVShow").ToList();
+
+            foreach (var tvShow in tvShows)
+            {
+                tvShow.GenericData = databaseConfig.Connection.Query<GenericData>("SELECT * FROM GenericData WHERE MediaID = @MediaID AND MediaType = 'tvshow'", new { MediaID = tvShow.ID }).ToList();
+            }
+
+            return tvShows;
         }
     }
 }

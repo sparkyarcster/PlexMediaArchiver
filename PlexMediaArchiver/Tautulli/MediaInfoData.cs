@@ -53,6 +53,6 @@ namespace PlexMediaArchiver.Tautulli
         public string video_resolution { get; set; }
         [JsonProperty("year", NullValueHandling = NullValueHandling.Ignore)]
         public string year { get; set; }
-        public List<MediaInfoData> DetailedMetaData { get; set; }
+        public MetaData DetailedMetaData { get; set; }
     }
 }

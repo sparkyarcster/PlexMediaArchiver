@@ -71,7 +71,7 @@ namespace PlexMediaArchiver
                 Classes.AppLogger.log.Info("Getting TV Shows...");
 
                 var tvLibraryLibrary = tautulliAPI.GetTVLibrary();
-                var tvshows = tautulliAPI.GetLibraryMediaInfoBySectionID(tvLibraryLibrary.SectionID, sectionType: tvLibraryLibrary.SectionType, length: tvLibraryLibrary.Count * 2);
+                var tvshows = tautulliAPI.GetLibraryMediaInfoBySectionID(tvLibraryLibrary.SectionID, sectionType: tvLibraryLibrary.SectionType, length: tvLibraryLibrary.Count * 2, loadDetailedMetaData: true);
                 itemCounter = 0;
                 totalCount = tvshows.Data.Count();
 
@@ -130,7 +130,8 @@ namespace PlexMediaArchiver
                 DataValue = movie.container
             });
 
-            if (movie.DetailedMetaData != null && movie.DetailedMetaData.Any())
+            if (movie.DetailedMetaData != null && movie.DetailedMetaData.MediaInfo != null
+                && movie.DetailedMetaData.MediaInfo.Any())
             {
                 mediaItem.GenericData.Add(new PMAData.Model.GenericData()
                 {
@@ -138,7 +139,7 @@ namespace PlexMediaArchiver
                     MediaID = mediaItem.ID,
                     MediaType = "movie",
                     DataKey = "Video Codec",
-                    DataValue = string.Join(",", movie.DetailedMetaData.Select(m => m.video_codec))
+                    DataValue = string.Join(",", movie.DetailedMetaData.MediaInfo.Select(m => m.video_codec))
                 });
             }
             else
@@ -159,6 +160,18 @@ namespace PlexMediaArchiver
         private void IndexTVShow(Tautulli.MediaInfoData tvshow)
         {
             var mediaItem = Classes.Mapper.mapper.Map<PMAData.Model.TVShow>(tvshow);
+
+            if (tvshow.DetailedMetaData != null)
+            {
+                mediaItem.GenericData.Add(new PMAData.Model.GenericData()
+                {
+                    ID = Guid.NewGuid(),
+                    MediaID = mediaItem.ID,
+                    MediaType = "tvshow",
+                    DataKey = "Episodes",
+                    DataValue = tvshow.DetailedMetaData.ChildrenCount.ToString()
+                });
+            }
 
             Classes.Database.TVShowRepository.CreateOrUpdate(mediaItem);
         }

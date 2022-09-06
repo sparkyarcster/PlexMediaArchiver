@@ -111,19 +111,19 @@ namespace PlexMediaArchiver.API
 
         public User GetUser(string ID, bool includeLastSeen = true)
         {
-            return doAPIRequest<User>("get_user", new { user_id = ID, include_last_seen = includeLastSeen }, Method.POST);
+            return doAPIRequest<User>("get_user", new { user_id = ID, include_last_seen = includeLastSeen });
         }
 
-        public List<MediaInfoData> GetMetadata(string ratingKey)
+        public MetaData GetMetadata(string ratingKey)
         {
-            var resp = doAPIRequest<Tautulli.GetMetadata>("get_metadata", new { rating_key = ratingKey }, Method.POST);
+            var resp = doAPIRequest<Tautulli.GetMetadata>("get_metadata", new { rating_key = ratingKey });
 
-            if (!string.IsNullOrEmpty(resp.Response.Error))
+            if (!string.IsNullOrEmpty(resp.Response.Message))
             {
-                Classes.AppLogger.log.Error($"GetMetadata: {ratingKey}: {resp.Response.Error}");
+                Classes.AppLogger.log.Error($"GetMetadata: {ratingKey}: {resp.Response.Message}");
             }
 
-            return resp.Response.Data.MediaInfo;
+            return resp.Response.Data;
         }
 
         private Library GetLibrary(string name)
@@ -167,7 +167,7 @@ namespace PlexMediaArchiver.API
                 length,
                 search,
                 refresh = true
-            }, Method.POST);
+            });
 
             if (!string.IsNullOrEmpty(resp.Response.Error))
             {
@@ -205,9 +205,9 @@ namespace PlexMediaArchiver.API
             return resp.Response.Data;
         }
 
-        private List<MediaInfoData> DoGetMetaData(string rating_key, int retry = 0)
+        private MetaData DoGetMetaData(string rating_key, int retry = 0)
         {
-            List<MediaInfoData> metaData = null;
+            MetaData metaData = null;
 
             try
             {
