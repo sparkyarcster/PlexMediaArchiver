@@ -50,7 +50,7 @@ namespace PlexMediaArchiver
                 Classes.AppLogger.log.Info("Getting Movies...");
 
                 var movieLibrary = tautulliAPI.GetMovieLibrary();
-                var movies = tautulliAPI.GetLibraryMediaInfoBySectionID(movieLibrary.SectionID, sectionType: movieLibrary.SectionType, length: movieLibrary.Count * 2, loadDetailedMetaData: false);
+                var movies = tautulliAPI.GetLibraryMediaInfoBySectionID(movieLibrary.SectionID, sectionType: movieLibrary.SectionType, length: movieLibrary.Count * 2, loadDetailedMetaData: true, updateInterval: 25);
                 var itemCounter = 0;
                 var totalCount = movies.Data.Count();
 
@@ -71,7 +71,7 @@ namespace PlexMediaArchiver
                 Classes.AppLogger.log.Info("Getting TV Shows...");
 
                 var tvLibraryLibrary = tautulliAPI.GetTVLibrary();
-                var tvshows = tautulliAPI.GetLibraryMediaInfoBySectionID(tvLibraryLibrary.SectionID, sectionType: tvLibraryLibrary.SectionType, length: tvLibraryLibrary.Count * 2, loadDetailedMetaData: true);
+                var tvshows = tautulliAPI.GetLibraryMediaInfoBySectionID(tvLibraryLibrary.SectionID, sectionType: tvLibraryLibrary.SectionType, length: tvLibraryLibrary.Count * 2, loadDetailedMetaData: true, updateInterval: 5);
                 itemCounter = 0;
                 totalCount = tvshows.Data.Count();
 
@@ -141,6 +141,38 @@ namespace PlexMediaArchiver
                     DataKey = "Video Codec",
                     DataValue = string.Join(",", movie.DetailedMetaData.MediaInfo.Select(m => m.video_codec))
                 });
+
+                var detailedMetaDataMediaInfo = movie.DetailedMetaData.MediaInfo.First();
+
+                if (detailedMetaDataMediaInfo.Parts != null && detailedMetaDataMediaInfo.Parts.Any())
+                {
+                    //foreach (var part in detailedMetaDataMediaInfo.Parts)
+                    //{
+                    //    mediaItem.GenericData.Add(new PMAData.Model.GenericData()
+                    //    {
+                    //        ID = Guid.NewGuid(),
+                    //        MediaID = mediaItem.ID,
+                    //        MediaType = "movie",
+                    //        DataKey = "File",
+                    //        DataValue = part.file ?? ""
+                    //    });
+                    //}
+
+                    foreach (var drive in detailedMetaDataMediaInfo.Parts.Select(p => p.drive).Distinct())
+                    {
+                        mediaItem.GenericData.Add(new PMAData.Model.GenericData()
+                        {
+                            ID = Guid.NewGuid(),
+                            MediaID = mediaItem.ID,
+                            MediaType = "movie",
+                            DataKey = "Drive",
+                            DataValue = drive ?? ""
+                        });
+                    }
+
+                    mediaItem.isArchived = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.ArchiveFilePath));
+                    mediaItem.isCurrent = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.MediaFilePath));
+                }
             }
             else
             {
@@ -171,6 +203,41 @@ namespace PlexMediaArchiver
                     DataKey = "Episodes",
                     DataValue = tvshow.DetailedMetaData.ChildrenCount.ToString()
                 });
+
+                if (tvshow.DetailedMetaData.MediaInfo != null && tvshow.DetailedMetaData.MediaInfo.Any())
+                {
+                    var detailedMetaDataMediaInfo = tvshow.DetailedMetaData.MediaInfo.First();
+
+                    if (detailedMetaDataMediaInfo.Parts != null && detailedMetaDataMediaInfo.Parts.Any())
+                    {
+                        //foreach (var part in detailedMetaDataMediaInfo.Parts)
+                        //{
+                        //    mediaItem.GenericData.Add(new PMAData.Model.GenericData()
+                        //    {
+                        //        ID = Guid.NewGuid(),
+                        //        MediaID = mediaItem.ID,
+                        //        MediaType = "tvshow",
+                        //        DataKey = "File",
+                        //        DataValue = part.file ?? ""
+                        //    });
+                        //}
+
+                        foreach (var drive in detailedMetaDataMediaInfo.Parts.Select(p => p.drive).Distinct())
+                        {
+                            mediaItem.GenericData.Add(new PMAData.Model.GenericData()
+                            {
+                                ID = Guid.NewGuid(),
+                                MediaID = mediaItem.ID,
+                                MediaType = "tvshow",
+                                DataKey = "Drive",
+                                DataValue = drive ?? ""
+                            });
+                        }
+
+                        mediaItem.isArchived = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.ArchiveFilePath));
+                        mediaItem.isCurrent = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.MediaFilePath));
+                    }
+                }
             }
 
             Classes.Database.TVShowRepository.CreateOrUpdate(mediaItem);

@@ -126,6 +126,18 @@ namespace PlexMediaArchiver.API
             return resp.Response.Data;
         }
 
+        public ChildrenMetaData GetChildrenMetadata(string ratingKey, string mediaType)
+        {
+            var resp = doAPIRequest<Tautulli.GetChildrenMetadata>("get_children_metadata", new { rating_key = ratingKey, media_type = mediaType });
+
+            if (!string.IsNullOrEmpty(resp.Response.Message))
+            {
+                Classes.AppLogger.log.Error($"GetChildrenMetadata: {ratingKey}, {mediaType}: {resp.Response.Message}");
+            }
+
+            return resp.Response.Data;
+        }
+
         private Library GetLibrary(string name)
         {
             return GetLibraries().FirstOrDefault(l => l.SectionName == name);
@@ -142,19 +154,20 @@ namespace PlexMediaArchiver.API
         }
 
         public MediaInfo GetLibraryMediaInfoByRatingKey(string ratingKey = null, string sectionType = "movie", string orderColumn = "last_played",
-                                                        string orderDir = null, int start = 0, int length = 25, string search = null)
+                                                        string orderDir = null, int start = 0, int length = 25, string search = null, int updateInterval = 25)
         {
-            return GetLibraryMediaInfo(ratingKey, null, sectionType, orderColumn, orderDir, start, length, search);
+            return GetLibraryMediaInfo(ratingKey, null, sectionType, orderColumn, orderDir, start, length, search, updateInterval: updateInterval);
         }
 
         public MediaInfo GetLibraryMediaInfoBySectionID(string sectionID, string sectionType = "movie", string orderColumn = "last_played",
-                                                        string orderDir = null, int start = 0, int length = 25, string search = null, bool loadDetailedMetaData = false)
+                                                        string orderDir = null, int start = 0, int length = 25, string search = null, bool loadDetailedMetaData = false,
+                                                        int updateInterval = 25)
         {
-            return GetLibraryMediaInfo(null, sectionID, sectionType, orderColumn, orderDir, start, length, search, loadDetailedMetaData);
+            return GetLibraryMediaInfo(null, sectionID, sectionType, orderColumn, orderDir, start, length, search, loadDetailedMetaData, updateInterval);
         }
 
         private MediaInfo GetLibraryMediaInfo(string ratingKey, string sectionID, string sectionType, string orderColumn, string orderDir, int start, int length, string search,
-            bool loadDetailedMetaData = false)
+            bool loadDetailedMetaData = false, int updateInterval = 25)
         {
             var resp = doAPIRequest<Tautulli.GetLibraryMediaInfo>("get_library_media_info", new
             {
@@ -183,9 +196,26 @@ namespace PlexMediaArchiver.API
                 foreach (var media in resp.Response.Data.Data)
                 {
                     media.DetailedMetaData = DoGetMetaData(media.rating_key);
+
+                    if (media.DetailedMetaData.MediaInfo == null || (media.DetailedMetaData.MediaInfo != null && media.DetailedMetaData.MediaInfo.Count == 0))
+                    {
+                        var mediaInfo = new MediaInfo();
+                        var mediaInfoData = new MediaInfoData();
+
+                        mediaInfoData.Parts = GetChildDataParts(media.rating_key, media.media_type);
+                        
+                        if ((media.file_size ?? 0) == 0)
+                        {
+                            media.file_size = mediaInfoData.Parts.Sum(p => p.file_size ?? 0);
+                        }
+
+                        mediaInfo.Data = new List<MediaInfoData>();
+                        mediaInfo.Data.Add(mediaInfoData);
+                    }
+
                     counter++;
 
-                    if (counter % 25 == 0)
+                    if (counter % updateInterval == 0)
                     {
                         Classes.AppLogger.log.Info($"{counter} / {totalCount}");
                     }
@@ -193,11 +223,11 @@ namespace PlexMediaArchiver.API
                     if (counter % 100 == 0)
                     {
                         Classes.AppLogger.log.Info("Let the service catch up for a moment...");
-                        System.Threading.Thread.Sleep(5000);
+                        System.Threading.Thread.Sleep(3000);
                     }
                     else
                     {
-                        System.Threading.Thread.Sleep(500);
+                        System.Threading.Thread.Sleep(100);
                     }
                 }
             }
@@ -231,6 +261,65 @@ namespace PlexMediaArchiver.API
             }
 
             return metaData;
+        }
+
+        private List<Parts> GetChildDataParts(string rating_key, string media_type)
+        {
+            var childMediaInfoParts = new List<Parts>();
+            var childrenMetaData = DoGetChildrenMetaData(rating_key, media_type);
+
+            if (childrenMetaData != null && childrenMetaData.ChildrenList.Any())
+            {
+                foreach (var child in childrenMetaData.ChildrenList.Where(c => !string.IsNullOrWhiteSpace(c.rating_key)))
+                {
+                    var childMetaData = DoGetMetaData(child.rating_key);
+
+                    if (childMetaData.MediaInfo == null || (childMetaData.MediaInfo != null && childMetaData.MediaInfo.Count == 0))
+                    {
+                        childMediaInfoParts.AddRange(GetChildDataParts(childMetaData.RatingKey, childMetaData.MediaType));
+                    }
+                    else
+                    {
+                        foreach (var info in childMetaData.MediaInfo)
+                        {
+                            if (info.Parts != null && info.Parts.Any())
+                            {
+                                childMediaInfoParts.AddRange(info.Parts);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return childMediaInfoParts;
+        }
+
+        private ChildrenMetaData DoGetChildrenMetaData(string rating_key, string mediaType, int retry = 0)
+        {
+            ChildrenMetaData childrenMetaData = null;
+
+            try
+            {
+                childrenMetaData = GetChildrenMetadata(rating_key, mediaType);
+
+                if (childrenMetaData == null)
+                {
+                    throw new Exception($"Children metadata for {rating_key} was null.");
+                }
+            }
+            catch (System.Exception ex)
+            {
+                if (retry < 3)
+                {
+                    return DoGetChildrenMetaData(rating_key, mediaType, retry + 1);
+                }
+                else
+                {
+                    Classes.AppLogger.log.Error(ex, $"Issue getting children metadata for {rating_key}.");
+                }
+            }
+
+            return childrenMetaData;
         }
     }
 }

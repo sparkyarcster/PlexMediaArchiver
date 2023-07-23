@@ -14,9 +14,9 @@ namespace PlexMediaArchiver.Tautulli
         [JsonProperty("recordsFiltered", NullValueHandling = NullValueHandling.Ignore)]
         public int? RecordsFiltered { get; set; }
         [JsonProperty("filtered_file_size", NullValueHandling = NullValueHandling.Ignore)]
-        public int? FilteredFileSize { get; set; }
+        public long? FilteredFileSize { get; set; }
         [JsonProperty("total_file_size", NullValueHandling = NullValueHandling.Ignore)]
-        public int? TotalFileSize { get; set; }
+        public long? TotalFileSize { get; set; }
         [JsonProperty("error", NullValueHandling = NullValueHandling.Ignore)]
         public string Error { get; set; }
         [JsonProperty("data", NullValueHandling = NullValueHandling.Ignore)]

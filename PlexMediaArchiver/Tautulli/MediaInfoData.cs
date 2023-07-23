@@ -18,7 +18,7 @@ namespace PlexMediaArchiver.Tautulli
         [JsonProperty("container", NullValueHandling = NullValueHandling.Ignore)]
         public string container { get; set; }
         [JsonProperty("file_size", NullValueHandling = NullValueHandling.Ignore)]
-        public int? file_size { get; set; }
+        public long? file_size { get; set; }
         [JsonProperty("grandparent_rating_key", NullValueHandling = NullValueHandling.Ignore)]
         public string grandparent_rating_key { get; set; }
         [JsonProperty("last_played", NullValueHandling = NullValueHandling.Ignore)]
@@ -53,6 +53,9 @@ namespace PlexMediaArchiver.Tautulli
         public string video_resolution { get; set; }
         [JsonProperty("year", NullValueHandling = NullValueHandling.Ignore)]
         public string year { get; set; }
+        [JsonProperty("parts", NullValueHandling = NullValueHandling.Ignore)]
+        public List<Parts> Parts { get; set; }
+
         public MetaData DetailedMetaData { get; set; }
     }
 }

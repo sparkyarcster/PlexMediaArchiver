@@ -147,5 +147,21 @@ namespace PlexMediaArchiver.Classes
                 return GetSettingValue("ReportLocation", "");
             }
         }
+
+        public static string MediaFilePath
+        {
+            get
+            {
+                return GetSettingValue("MediaFilePath", "");
+            }
+        }
+
+        public static string ArchiveFilePath
+        {
+            get
+            {
+                return GetSettingValue("ArchiveFilePath", "");
+            }
+        }
     }
 }

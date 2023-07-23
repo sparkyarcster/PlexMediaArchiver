@@ -75,7 +75,7 @@ namespace PlexMediaArchiver
                         {
                             if(property.Name == "MediaSize" || property.Name == "FileSize")
                             {
-                                outputData.Append($"{(int.Parse(value.ToString()) / 1000000)} MB");
+                                outputData.Append($"{(long.Parse(value.ToString()) / 1000000)} MB");
                             }
                             else if (value.ToString().Contains(","))
                             {
