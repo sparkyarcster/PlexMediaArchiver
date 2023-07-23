@@ -15,8 +15,8 @@ namespace PlexMediaArchiver.Classes
                 .ForMember(d => d.GenericData, o => o.Ignore())
                 .ForMember(d => d.Title, o => o.MapFrom(s => s.title))
                 .ForMember(d => d.Year, o => o.MapFrom(s => s.year))
-                .ForMember(d => d.isArchived, o => o.Ignore())
-                .ForMember(d => d.isCurrent, o => o.Ignore());
+                .ForMember(d => d.IsArchived, o => o.Ignore())
+                .ForMember(d => d.IsCurrent, o => o.Ignore());
 
             CreateMap<Tautulli.MediaInfoData, PMAData.Model.TVShow>()
                 .ForMember(d => d.ID, o => o.MapFrom(s => int.Parse(s.rating_key)))
@@ -26,8 +26,8 @@ namespace PlexMediaArchiver.Classes
                 .ForMember(d => d.GenericData, o => o.Ignore())
                 .ForMember(d => d.Title, o => o.MapFrom(s => s.title))
                 .ForMember(d => d.Year, o => o.MapFrom(s => s.year))
-                .ForMember(d => d.isArchived, o => o.Ignore())
-                .ForMember(d => d.isCurrent, o => o.Ignore());
+                .ForMember(d => d.IsArchived, o => o.Ignore())
+                .ForMember(d => d.IsCurrent, o => o.Ignore());
 
             CreateMap<Tautulli.User, PMAData.Model.User>()
                 .ForMember(d => d.GenericData, o => o.Ignore())

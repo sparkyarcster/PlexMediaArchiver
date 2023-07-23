@@ -17,8 +17,8 @@ namespace PMAData.Database
         {
             this.databaseConfig = databaseConfig;
             this.tableConfiguration = new Dictionary<string, string>() {
-                { "Movie", "Create Table Movie (ID INT NOT NULL, Title VARCHAR(1000) NOT NULL, Year VARCHAR(4) NOT NULL, LastPlayed DATETIME NULL, Added DATETIME NULL, FileSize BIGINT NOT NULL);" },
-                { "TVShow", "Create Table TVShow (ID INT NOT NULL, Title VARCHAR(1000) NOT NULL, Year VARCHAR(4) NOT NULL, LastPlayed DATETIME NULL, Added DATETIME NULL, FileSize BIGINT NOT NULL);" },
+                { "Movie", "Create Table Movie (ID INT NOT NULL, Title VARCHAR(1000) NOT NULL, Year VARCHAR(4) NOT NULL, LastPlayed DATETIME NULL, Added DATETIME NULL, FileSize BIGINT NOT NULL, IsCurrent BIT NOT NULL, IsArchived BIT NOT NULL);" },
+                { "TVShow", "Create Table TVShow (ID INT NOT NULL, Title VARCHAR(1000) NOT NULL, Year VARCHAR(4) NOT NULL, LastPlayed DATETIME NULL, Added DATETIME NULL, FileSize BIGINT NOT NULL, IsCurrent BIT NOT NULL, IsArchived BIT NOT NULL);" },
                 { "User", "Create Table User (ID INT NOT NULL, UserName VARCHAR(100) NOT NULL, LastLogin DATETIME NULL, LastActivity DATETIME NULL);" },
                 { "GenericData", "Create Table GenericData (ID UNIQUEIDENTIFIER NOT NULL, MediaID INT NOT NULL, MediaType VARCHAR(255) NOT NULL, DataKey VARCHAR(255) NOT NULL, DataValue VARCHAR(255) NULL);" }
             };

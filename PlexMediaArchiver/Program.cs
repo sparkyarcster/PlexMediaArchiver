@@ -90,8 +90,8 @@ namespace PlexMediaArchiver
                     Codec = m.GenericData.FirstOrDefault(d => d.DataKey == "Video Codec").DataValue,
                     Container = m.GenericData.FirstOrDefault(d => d.DataKey == "Container").DataValue,
                     Drive = string.Join(";", m.GenericData.Where(d => d.DataKey == "Drive" && d.DataValue != null).Select(d => d.DataValue)),
-                    Current = m.isCurrent,
-                    Archived = m.isArchived
+                    Current = m.IsCurrent,
+                    Archived = m.IsArchived
                 });
 
                 if (mpeg4Data.Count() > 0)
@@ -108,8 +108,8 @@ namespace PlexMediaArchiver
                     Codec = m.GenericData.FirstOrDefault(d => d.DataKey == "Video Codec").DataValue,
                     Container = m.GenericData.FirstOrDefault(d => d.DataKey == "Container").DataValue,
                     Drive = string.Join(";", m.GenericData.Where(d => d.DataKey == "Drive" && d.DataValue != null).Select(d => d.DataValue)),
-                    Current = m.isCurrent,
-                    Archived = m.isArchived
+                    Current = m.IsCurrent,
+                    Archived = m.IsArchived
                 });
 
                 if (aviData.Count() > 0)
@@ -132,8 +132,8 @@ namespace PlexMediaArchiver
                         DateAdded = m.Added,
                         LastPlayed = m.LastPlayed,
                         Drive = string.Join(";", m.GenericData.Where(d => d.DataKey == "Drive" && d.DataValue != null).Select(d => d.DataValue)),
-                        Current = m.isCurrent,
-                        Archived = m.isArchived
+                        Current = m.IsCurrent,
+                        Archived = m.IsArchived
                     });
 
                 if (notWatchedMovies.Count() > 0)
@@ -157,8 +157,8 @@ namespace PlexMediaArchiver
                         DateAdded = s.Added,
                         LastPlayed = s.LastPlayed,
                         Drive = string.Join(";", s.GenericData.Where(d => d.DataKey == "Drive" && d.DataValue != null).Select(d => d.DataValue)),
-                        Current = s.isCurrent,
-                        Archived = s.isArchived
+                        Current = s.IsCurrent,
+                        Archived = s.IsArchived
                     });
 
                 if (notWatchedTVShows.Count() > 0)

@@ -170,8 +170,8 @@ namespace PlexMediaArchiver
                         });
                     }
 
-                    mediaItem.isArchived = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.ArchiveFilePath));
-                    mediaItem.isCurrent = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.MediaFilePath));
+                    mediaItem.IsArchived = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.ArchiveFilePath));
+                    mediaItem.IsCurrent = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.MediaFilePath));
                 }
             }
             else
@@ -234,8 +234,8 @@ namespace PlexMediaArchiver
                             });
                         }
 
-                        mediaItem.isArchived = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.ArchiveFilePath));
-                        mediaItem.isCurrent = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.MediaFilePath));
+                        mediaItem.IsArchived = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.ArchiveFilePath));
+                        mediaItem.IsCurrent = detailedMetaDataMediaInfo.Parts.Any(p => p.file.StartsWith(Classes.Constants.MediaFilePath));
                     }
                 }
             }
