@@ -13,8 +13,9 @@ using Plex.Api.Models;
 using Plex.Api.Models.Friends;
 using Plex.Api.Models.Server;
 using Plex.Api.Models.Status;
+using PlexMediaArchiver.Classes.Model;
 
-namespace PlexMediaArchiver
+namespace PlexMediaArchiver.API
 {
     public class PlexAPI
     {
@@ -62,8 +63,8 @@ namespace PlexMediaArchiver
         {
             plexApi = ServiceProvider.GetService<IPlexClient>();
 
-            var login = ConfigurationManager.AppSettings["PlexLogin"];
-            var password = ConfigurationManager.AppSettings["PlexPassword"];
+            var login = Classes.Constants.PlexLogin;
+            var password = Classes.Constants.PlexPassword;
 
             plexUser = plexApi.SignIn(login, password).Result; 
         }
@@ -71,7 +72,7 @@ namespace PlexMediaArchiver
         public Server GetPreferredServer()
         {
             var servers = GetServers();
-            var preferredServer = ConfigurationManager.AppSettings["PlexServer"];
+            var preferredServer = Classes.Constants.PlexServer;
 
             if (servers.Any())
             {
@@ -163,7 +164,7 @@ namespace PlexMediaArchiver
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Classes.AppLogger.log.Error(ex);
                 return null;
             }
         }
